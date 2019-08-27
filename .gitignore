@@ -59,3 +59,7 @@ typings/
 
 # next.js build output
 .next
+
+# Sublime project configs
+*.sublime-project
+*.sublime-workspace
