@@ -8,12 +8,10 @@ import {
 
 
 const Description = styled.p`
-  font-weight: lighter;
-  font-size: 48px;
-  padding: 0;
-  margin: 0;
   margin-bottom: 30px;
   margin-top: 4em;
+  font-size: 48px;
+  padding: 0;
 `;
 
 class Home extends Component {
@@ -22,13 +20,13 @@ class Home extends Component {
       <Wrapper>
         <Description>Lend application homepage.</Description>
         <Button
-          type="solid"
+          styleClass="solid"
           bgColor="primary"
           color="white"
           margin="0 5px 0 0"
           onClick={() => this.props.history.push('/login')}>Login</Button>
         <Button
-          type="solid"
+          styleClass="solid"
           bgColor="accent"
           color="white"
           margin="0 0 0 5px"
