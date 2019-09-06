@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+import { withContext } from './../../../helpers/context';
+import { request } from './../../../helpers/request';
 import {
   Button,
   Wrapper,
 } from './../../../helpers/styled-components';
+import moment from 'moment';
 
 
 const ItemTitle = styled.div`
@@ -93,21 +96,49 @@ const Card = styled.div`
 `;
 
 class Account extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      account: null
+    };
+  }
+
+  async componentDidMount() {
+    try {
+      const headers = {Authorization: `Token ${localStorage.getItem('token')}`};
+      const account = await request.get('/account/', { headers });
+      const transactions = await request.get(
+        `/account/${account.data.number}/activity/`,
+        { headers });
+      this.setState({
+        account: account.data,
+        transactions: transactions.data
+      });
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   render() {
+    const { user } = this.props.context;
+    const { account, transactions } = this.state;
+
+    if(!account || !transactions) return null;
+
     return (
       <Wrapper>
         <Card>
           <AccountItem>
             <ItemTitle>Account number</ItemTitle>
-            <ItemContent>1234567890</ItemContent>
+            <ItemContent>{account.number}</ItemContent>
           </AccountItem>
           <AccountItem>
             <ItemTitle>Balance</ItemTitle>
-            <ItemContent>$123.00</ItemContent>
+            <ItemContent>{`$ ${account.balance.toFixed(2)}`}</ItemContent>
           </AccountItem>
           <AccountItem>
             <ItemTitle>Account Status</ItemTitle>
-            <ItemContent>Active</ItemContent>
+            <ItemContent>{account.is_active === true ? 'Active' : 'Inactive'}</ItemContent>
           </AccountItem>
           <AccountItem>
             <ItemTitle>Last Loan</ItemTitle>
@@ -123,17 +154,17 @@ class Account extends Component {
               <TransType>Type</TransType>
               <TransAmount>Amount</TransAmount>
             </Transaction>
-            <Transaction>
-              <TransDate>Aug 30, 2019</TransDate>
-              <TransDesc>For boquet</TransDesc>
-              <TransType>Loan</TransType>
-              <TransAmount>$15.00</TransAmount>
-            </Transaction>
-            <LoadMore
+            {transactions.results.map((item, i) => <Transaction key={i}>
+              <TransDate>{moment(item.created_at).format('MMM Do, YYYY')}</TransDate>
+              <TransDesc>{item.description}</TransDesc>
+              <TransType>{item.type}</TransType>
+              <TransAmount>{`$${item.amount.toFixed(2)}`}</TransAmount>
+            </Transaction>)}
+            {transactions.next && <LoadMore
               styleClass="solid"
               bgColor="primary"
               color="white"
-              margin="20px auto">Load more</LoadMore>
+              margin="20px auto">Load more</LoadMore>}
           </TransactionList>
         </Card>
       </Wrapper>
@@ -141,4 +172,4 @@ class Account extends Component {
   }
 }
 
-export default Account;
+export default withContext(Account);
